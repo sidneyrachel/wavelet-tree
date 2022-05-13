@@ -28,7 +28,7 @@ class Node(object):
         if self.__full_size() < position:
             return -1
         bit = self.__get_bit(character)
-        position_size = self.__get_rank(position, bit)   # Calculate the rank
+        position_size = self.get_rank(position, bit)     # Calculate the rank
         if self.__size() == 2:                           # When the size is 2 then i find leaf and must finish
             return position_size
         if bit:                                          # For true(1) go to the right child, for false(0) go to the left child
@@ -45,7 +45,7 @@ class Node(object):
         if self.__full_size() < position:
             return -1
         bit = self.bits_full_data[position-1]
-        position_size = self.__get_rank(position, bit)   #Calculate the rank
+        position_size = self.get_rank(position, bit)     #Calculate the rank
 
         if bit:                                          #For true(1) go to the right child, for false(0) go to the left child
             return self.children[1].get_track_symbol(position_size)
@@ -60,8 +60,8 @@ class Node(object):
         return self.parent.__get_select(curent_position, True)
 
     def __find_position(self, position=None, bit=None):
-        #position_size = self.__get_rank(position, bit)
-        #curent_position = position#self.__get_rank(position, bit)
+        #position_size = self.get_rank(position, bit)
+        #curent_position = position#self.get_rank(position, bit)
         #position_size = curent_position
         #if position_size == position:
         #    return curent_position
@@ -75,7 +75,7 @@ class Node(object):
             curent_position += 1
         return -1
 
-    def __get_rank(self, position=None, bit=None):
+    def get_rank(self, position=None, bit=None):
         if position is None or bit is None:
             print('Please give correct parameters')
             return -1
