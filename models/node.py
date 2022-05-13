@@ -28,7 +28,7 @@ class Node(object):
         if self.__full_size() < position:
             return -1
         bit = self.__get_bit(character)
-        position_size = self.get_rank(position, bit)     # Calculate the rank
+        position_size = self.get_rank_bit(position, bit) # Calculate the rank
         if self.__size() == 2:                           # When the size is 2 then i find leaf and must finish
             return position_size
         if bit:                                          # For true(1) go to the right child, for false(0) go to the left child
@@ -37,7 +37,7 @@ class Node(object):
 
     def get_select_query(self, position=None, character=None):
         leaf = self.__get_leaf(character)                   #Get the leaf where the character is
-        return leaf.__get_select(position, leaf.bits_data[leaf.data.index(character)])
+        return leaf.get_select_bit(position, leaf.bits_data[leaf.data.index(character)])
 
     def get_track_symbol(self, position=None):
         if self.__size() == 2:                           #When the size is 2 then i find leaf and must finish
@@ -45,23 +45,23 @@ class Node(object):
         if self.__full_size() < position:
             return -1
         bit = self.bits_full_data[position-1]
-        position_size = self.get_rank(position, bit)     #Calculate the rank
+        position_size = self.get_rank_bit(position, bit) #Calculate the rank
 
         if bit:                                          #For true(1) go to the right child, for false(0) go to the left child
             return self.children[1].get_track_symbol(position_size)
         return self.children[0].get_track_symbol(position_size)
 
-    def __get_select(self, position=None, bit=None):
+    def get_select_bit(self, position=None, bit=None):
         curent_position = self.__find_position(position, bit)   #Find how many bit has the word until the position
         if self.parent is None:                                 #If is parent then find the position
             return curent_position
         if self.from_left_parent:                               #For left child calculate False(0), for right child calculate True(1)
-            return self.parent.__get_select(curent_position, False)
-        return self.parent.__get_select(curent_position, True)
+            return self.parent.get_select_bit(curent_position, False)
+        return self.parent.get_select_bit(curent_position, True)
 
     def __find_position(self, position=None, bit=None):
-        #position_size = self.get_rank(position, bit)
-        #curent_position = position#self.get_rank(position, bit)
+        #position_size = self.get_rank_bit(position, bit)
+        #curent_position = position#self.get_rank_bit(position, bit)
         #position_size = curent_position
         #if position_size == position:
         #    return curent_position
@@ -75,7 +75,7 @@ class Node(object):
             curent_position += 1
         return -1
 
-    def get_rank(self, position=None, bit=None):
+    def get_rank_bit(self, position=None, bit=None):
         if position is None or bit is None:
             print('Please give correct parameters')
             return -1
