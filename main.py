@@ -8,6 +8,7 @@ def main():
     if (not file_reader.is_read()):
         sys.exit()
     wavelet_tree = WaveletTree(file_reader.get_characters())
+    wavelet_tree.print_tree()
     # print(wavelet_tree.track_symbol(1))
     # print(wavelet_tree.rank_query('5', 6))
     # print(wavelet_tree.select_query('e', 1))
