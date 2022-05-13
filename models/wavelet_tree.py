@@ -54,8 +54,10 @@ class WaveletTree(object):
 
         if is_contain:
             select_ep = curr_node.get_select_bit(curr_node.get_rank_bit(ep, bit), bit)
+            new_sp = curr_node.get_rank_bit(select_sp, bit)
+            new_ep = curr_node.get_rank_bit(select_ep, bit)
 
-            return is_contain, select_sp, select_ep
+            return is_contain, new_sp, new_ep
         else:
             return is_contain, None, None
 
@@ -63,21 +65,17 @@ class WaveletTree(object):
         if len(curr_node.children) == 0:
             return curr_node.full_data[0]
 
-        is_contain_1, select_sp_1, select_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
+        is_contain_1, new_sp_1, new_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
 
         if is_contain_1:
-            new_sp = curr_node.get_rank_bit(select_sp_1, True)
-            new_ep = curr_node.get_rank_bit(select_ep_1, True)
             curr_node = curr_node.children[1]
 
-            return self.max_elem_util(curr_node, new_sp, new_ep)
+            return self.max_elem_util(curr_node, new_sp_1, new_ep_1)
         else:
-            is_contain_0, select_sp_0, select_ep_0 = self.is_contain_bit(curr_node, sp, ep, False)
-            new_sp = curr_node.get_rank_bit(select_sp_0, False)
-            new_ep = curr_node.get_rank_bit(select_ep_0, False)
+            is_contain_0, new_sp_0, new_sp_0 = self.is_contain_bit(curr_node, sp, ep, False)
             curr_node = curr_node.children[0]
 
-            return self.max_elem_util(curr_node, new_sp, new_ep)
+            return self.max_elem_util(curr_node, new_sp_0, new_sp_0)
 
     def max_elem(self, sp, ep):
         return self.max_elem_util(self.__root, sp, ep)
@@ -86,34 +84,42 @@ class WaveletTree(object):
         if len(curr_node.children) == 0:
             return curr_node.full_data[0]
 
-        is_contain_0, select_sp_0, select_ep_0 = self.is_contain_bit(curr_node, sp, ep, False)
+        is_contain_0, new_sp_0, new_ep_0 = self.is_contain_bit(curr_node, sp, ep, False)
 
         if is_contain_0:
-            new_sp = curr_node.get_rank_bit(select_sp_0, False)
-            new_ep = curr_node.get_rank_bit(select_ep_0, False)
             curr_node = curr_node.children[0]
 
-            return self.min_elem_util(curr_node, new_sp, new_ep)
+            return self.min_elem_util(curr_node, new_sp_0, new_ep_0)
         else:
-            is_contain_1, select_sp_1, select_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
-            new_sp = curr_node.get_rank_bit(select_sp_1, True)
-            new_ep = curr_node.get_rank_bit(select_ep_1, True)
+            is_contain_1, new_sp_1, new_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
             curr_node = curr_node.children[1]
 
-            return self.min_elem_util(curr_node, new_sp, new_ep)
+            return self.min_elem_util(curr_node, new_sp_1, new_ep_1)
 
     def min_elem(self, sp, ep):
         return self.min_elem_util(self.__root, sp, ep)
 
+    def range_int_util(self, curr_node, sp1, ep1, sp2, ep2):
+        if len(curr_node.children) == 0:
+            return [curr_node.full_data[0]]
+
+        is_int1_contain_1, new_sp1_1, new_ep1_1 = self.is_contain_bit(curr_node, sp1, ep1, True)
+        is_int2_contain_1, new_sp2_1, new_ep2_1 = self.is_contain_bit(curr_node, sp2, ep2, True)
+
+        common_right = []
+
+        if is_int1_contain_1 and is_int2_contain_1:
+            common_right = self.range_int_util(curr_node.children[1], new_sp1_1, new_ep1_1, new_sp2_1, new_ep2_1)
+
+        is_int1_contain_0, new_sp1_0, new_ep1_0 = self.is_contain_bit(curr_node, sp1, ep1, False)
+        is_int2_contain_0, new_sp2_0, new_ep2_0 = self.is_contain_bit(curr_node, sp2, ep2, False)
+
+        common_left = []
+
+        if is_int1_contain_0 and is_int2_contain_0:
+            common_left = self.range_int_util(curr_node.children[0], new_sp1_0, new_ep1_0, new_sp2_0, new_ep2_0)
+
+        return common_right + common_left
+
     def range_int(self, sp1, ep1, sp2, ep2):
-        curr_node = self.__root
-
-        rank_sp1_0 = (0 if sp1 == 1 else curr_node.get_rank_bit(sp1 - 1, False)) + 1
-        select_sp1_0 = curr_node.get_select_bit(rank_sp1_0, False)
-
-        rank_sp1_1 = (0 if sp1 == 1 else curr_node.get_rank_bit(sp1 - 1, True)) + 1
-        select_sp1_1 = curr_node.get_select_bit(rank_sp1_1, True)
-
-        interval1_contains_0 = sp1 <= select_sp1_0 <= ep1
-        interval1_contains_1 = sp1 <= select_sp1_1 <= ep1
-
+        return self.range_int_util(self.__root, sp1, ep1, sp2, ep2)
