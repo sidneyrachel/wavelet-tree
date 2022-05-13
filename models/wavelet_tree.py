@@ -26,16 +26,19 @@ class WaveletTree(object):
             return -1
         return self.__root.get_track_symbol(position)
 
-    def __print_tree_util(self, current_node, space_num):
+    def __print_tree_util(self, current_node, space_num, bit):
         space = ''.join([' '] * space_num)
-        print(space + ' '.join(current_node.full_data))
+        if bit:
+            print(space + ' '.join([str(int(bit_data)) for bit_data in current_node.bits_full_data]))
+        else:
+            print(space + ' '.join(current_node.full_data))
 
         new_space_num = space_num + 2
 
         for child in current_node.children:
-            self.__print_tree_util(child, new_space_num)
+            self.__print_tree_util(child, new_space_num, bit)
 
-    def print_tree(self):
+    def print_tree(self, bit=False):
         current_node = self.__root
 
-        self.__print_tree_util(current_node, 0)
+        self.__print_tree_util(current_node, 0, bit)
