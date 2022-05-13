@@ -1,4 +1,5 @@
 from models.node import Node
+from queue import PriorityQueue
 
 
 class WaveletTree(object):
@@ -125,9 +126,12 @@ class WaveletTree(object):
     def is_overlap(self, l, h, part_l, part_h):
         return h >= part_l and l <= part_h
 
-    def max_range_util(self, curr_node, sp, ep, l, h):
+    def max_range_util(self, prio_queue, curr_node, sp, ep, l, h):
         if len(curr_node.children) == 0:
-            return [curr_node.full_data[0]]
+            if l <= curr_node.full_data[0] <= h:
+                prio_queue.put((-1 * len(curr_node.full_data), curr_node.full_data[0]))
+
+            return
 
         left_l = curr_node.children[0].data[0]
         left_h = curr_node.children[0].data[-1]
@@ -135,40 +139,36 @@ class WaveletTree(object):
         right_h = curr_node.children[1].data[-1]
 
         is_left_overlap = self.is_overlap(l, h, left_l, left_h)
-        is_right_overlap = self.is_overlap(l, h, right_l, right_h)
-
         is_contain_0, new_sp_0, new_ep_0 = self.is_contain_bit(curr_node, sp, ep, False)
+
+        if is_left_overlap and is_contain_0:
+            self.max_range_util(prio_queue, curr_node.children[0], new_sp_0, new_ep_0, l, h)
+
+        is_right_overlap = self.is_overlap(l, h, right_l, right_h)
         is_contain_1, new_sp_1, new_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
 
-        print('is_left_overlap', is_left_overlap)
-        print('is_right_overlap', is_right_overlap)
-        print('is_contain_0 new_sp_0 new_ep_0', is_contain_0, new_sp_0, new_ep_0)
-        print('is_contain_1 new_sp_1 new_ep_1', is_contain_1, new_sp_1, new_ep_1)
-
-        if is_left_overlap and is_contain_0 and is_right_overlap and is_contain_1:
-            rank_sp_0 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, False))
-            rank_ep_0 = curr_node.get_rank_bit(ep, False)
-            rank_sp_1 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, True))
-            rank_ep_1 = curr_node.get_rank_bit(ep, True)
-
-            num_0 = rank_ep_0 - rank_sp_0
-            num_1 = rank_ep_1 - rank_sp_1
-
-            print('num_0 num_1', num_0, num_1)
-
-            if num_0 == num_1:
-                return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h) + \
-                         self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
-            elif num_0 > num_1:
-                return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h)
-            else:
-                return self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
-        elif is_left_overlap and is_contain_0:
-            return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h)
-        elif is_right_overlap and is_contain_1:
-            return self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
-        else:
-            return []
+        if is_right_overlap and is_contain_1:
+            self.max_range_util(prio_queue, curr_node.children[1], new_sp_1, new_ep_1, l, h)
 
     def max_range(self, sp, ep, l, h):
-        return self.max_range_util(self.__root, sp, ep, l, h)
+        prio_queue = PriorityQueue()
+
+        self.max_range_util(prio_queue, self.__root, sp, ep, l, h)
+
+        highest_num_element = 0
+        result = []
+
+        while not prio_queue.empty():
+            queue_element = prio_queue.get()
+            num_element = abs(queue_element[0])
+            element = queue_element[1]
+
+            if highest_num_element == 0:
+                highest_num_element = num_element
+                result.append(element)
+            elif num_element == highest_num_element:
+                result.append(element)
+            else:
+                break
+
+        return result
