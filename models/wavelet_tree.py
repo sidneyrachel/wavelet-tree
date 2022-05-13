@@ -103,23 +103,72 @@ class WaveletTree(object):
         if len(curr_node.children) == 0:
             return [curr_node.full_data[0]]
 
-        is_int1_contain_1, new_sp1_1, new_ep1_1 = self.is_contain_bit(curr_node, sp1, ep1, True)
-        is_int2_contain_1, new_sp2_1, new_ep2_1 = self.is_contain_bit(curr_node, sp2, ep2, True)
-
-        common_right = []
-
-        if is_int1_contain_1 and is_int2_contain_1:
-            common_right = self.range_int_util(curr_node.children[1], new_sp1_1, new_ep1_1, new_sp2_1, new_ep2_1)
-
         is_int1_contain_0, new_sp1_0, new_ep1_0 = self.is_contain_bit(curr_node, sp1, ep1, False)
         is_int2_contain_0, new_sp2_0, new_ep2_0 = self.is_contain_bit(curr_node, sp2, ep2, False)
 
-        common_left = []
+        result = []
 
         if is_int1_contain_0 and is_int2_contain_0:
-            common_left = self.range_int_util(curr_node.children[0], new_sp1_0, new_ep1_0, new_sp2_0, new_ep2_0)
+            result += self.range_int_util(curr_node.children[0], new_sp1_0, new_ep1_0, new_sp2_0, new_ep2_0)
 
-        return common_right + common_left
+        is_int1_contain_1, new_sp1_1, new_ep1_1 = self.is_contain_bit(curr_node, sp1, ep1, True)
+        is_int2_contain_1, new_sp2_1, new_ep2_1 = self.is_contain_bit(curr_node, sp2, ep2, True)
+
+        if is_int1_contain_1 and is_int2_contain_1:
+            result += self.range_int_util(curr_node.children[1], new_sp1_1, new_ep1_1, new_sp2_1, new_ep2_1)
+
+        return result
 
     def range_int(self, sp1, ep1, sp2, ep2):
         return self.range_int_util(self.__root, sp1, ep1, sp2, ep2)
+
+    def is_overlap(self, l, h, part_l, part_h):
+        return h >= part_l and l <= part_h
+
+    def max_range_util(self, curr_node, sp, ep, l, h):
+        if len(curr_node.children) == 0:
+            return [curr_node.full_data[0]]
+
+        left_l = curr_node.children[0].data[0]
+        left_h = curr_node.children[0].data[-1]
+        right_l = curr_node.children[1].data[0]
+        right_h = curr_node.children[1].data[-1]
+
+        is_left_overlap = self.is_overlap(l, h, left_l, left_h)
+        is_right_overlap = self.is_overlap(l, h, right_l, right_h)
+
+        is_contain_0, new_sp_0, new_ep_0 = self.is_contain_bit(curr_node, sp, ep, False)
+        is_contain_1, new_sp_1, new_ep_1 = self.is_contain_bit(curr_node, sp, ep, True)
+
+        print('is_left_overlap', is_left_overlap)
+        print('is_right_overlap', is_right_overlap)
+        print('is_contain_0 new_sp_0 new_ep_0', is_contain_0, new_sp_0, new_ep_0)
+        print('is_contain_1 new_sp_1 new_ep_1', is_contain_1, new_sp_1, new_ep_1)
+
+        if is_left_overlap and is_contain_0 and is_right_overlap and is_contain_1:
+            rank_sp_0 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, False))
+            rank_ep_0 = curr_node.get_rank_bit(ep, False)
+            rank_sp_1 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, True))
+            rank_ep_1 = curr_node.get_rank_bit(ep, True)
+
+            num_0 = rank_ep_0 - rank_sp_0
+            num_1 = rank_ep_1 - rank_sp_1
+
+            print('num_0 num_1', num_0, num_1)
+
+            if num_0 == num_1:
+                return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h) + \
+                         self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
+            elif num_0 > num_1:
+                return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h)
+            else:
+                return self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
+        elif is_left_overlap and is_contain_0:
+            return self.max_range_util(curr_node.children[0], new_sp_0, new_ep_0, l, h)
+        elif is_right_overlap and is_contain_1:
+            return self.max_range_util(curr_node.children[1], new_sp_1, new_ep_1, l, h)
+        else:
+            return []
+
+    def max_range(self, sp, ep, l, h):
+        return self.max_range_util(self.__root, sp, ep, l, h)
