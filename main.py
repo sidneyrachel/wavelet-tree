@@ -10,7 +10,7 @@ def main():
         sys.exit()
 
     wavelet_tree = WaveletTree(file_reader.get_characters())
-    print(wavelet_tree.max_elem(5, 8))
+    print(wavelet_tree.max_elem(4, 8))
 
 
 if __name__ == '__main__':

@@ -37,7 +37,7 @@ class Node(object):
 
     def get_select_query(self, position=None, character=None):
         leaf = self.__get_leaf(character)                   #Get the leaf where the character is
-        return leaf.get_select_bit(position, leaf.bits_data[leaf.data.index(character)])
+        return leaf.__get_select(position, leaf.bits_data[leaf.data.index(character)])
 
     def get_track_symbol(self, position=None):
         if self.__size() == 2:                           #When the size is 2 then i find leaf and must finish
@@ -51,15 +51,15 @@ class Node(object):
             return self.children[1].get_track_symbol(position_size)
         return self.children[0].get_track_symbol(position_size)
 
-    def get_select_bit(self, position=None, bit=None):
-        curent_position = self.__find_position(position, bit)   #Find how many bit has the word until the position
+    def __get_select(self, position=None, bit=None):
+        curent_position = self.get_select_bit(position, bit)   #Find how many bit has the word until the position
         if self.parent is None:                                 #If is parent then find the position
             return curent_position
         if self.from_left_parent:                               #For left child calculate False(0), for right child calculate True(1)
-            return self.parent.get_select_bit(curent_position, False)
-        return self.parent.get_select_bit(curent_position, True)
+            return self.parent.__get_select(curent_position, False)
+        return self.parent.__get_select(curent_position, True)
 
-    def __find_position(self, position=None, bit=None):
+    def get_select_bit(self, position=None, bit=None):
         #position_size = self.get_rank_bit(position, bit)
         #curent_position = position#self.get_rank_bit(position, bit)
         #position_size = curent_position

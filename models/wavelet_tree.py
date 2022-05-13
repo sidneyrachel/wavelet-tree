@@ -46,46 +46,26 @@ class WaveletTree(object):
 
         self.__print_tree_util(current_node, 0, bit)
 
-    def get_array_index(self, num):  # idx starts from 0
-        return num - 1
-
-    def get_original_index(self, num):  # idx starts from 1
-        return num + 1
-
     def max_elem_util(self, curr_node, sp, ep):
         if len(curr_node.children) == 0:
             return curr_node.full_data[0]
 
-        sp_idx = self.get_array_index(sp)
-        ep_idx = self.get_array_index(ep)
+        rank_sp_1 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, True)) + 1
+        select_sp_1 = curr_node.get_select_bit(rank_sp_1, True)
 
-        st_0 = -1
-        end_0 = -1
-        st_1 = -1
-        end_1 = -1
-
-        # TODO: Change this to be more efficient
-        for idx in range(sp_idx, ep_idx + 1):
-            if curr_node.bits_full_data[idx]:
-                end_1 = idx
-
-                if st_1 == -1:
-                    st_1 = idx
-            else:
-                end_0 = idx
-
-                if st_0 == -1:
-                    st_0 = idx
-
-        if st_1 != -1:
-            new_sp = curr_node.get_rank(self.get_original_index(st_1), True)
-            new_ep = curr_node.get_rank(self.get_original_index(end_1), True)
+        if sp <= select_sp_1 <= ep:  # contains 1
+            select_ep_1 = curr_node.get_select_bit(curr_node.get_rank_bit(ep, True), True)
+            new_sp = curr_node.get_rank_bit(select_sp_1, True)
+            new_ep = curr_node.get_rank_bit(select_ep_1, True)
             curr_node = curr_node.children[1]
 
             return self.max_elem_util(curr_node, new_sp, new_ep)
         else:
-            new_sp = curr_node.get_rank(self.get_original_index(st_0), False)
-            new_ep = curr_node.get_rank(self.get_original_index(end_0), False)
+            rank_sp_0 = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, False)) + 1
+            select_sp_0 = curr_node.get_select_bit(rank_sp_0, False)
+            select_ep_0 = curr_node.get_select_bit(curr_node.get_rank_bit(ep, False), False)
+            new_sp = curr_node.get_rank_bit(select_sp_0, False)
+            new_ep = curr_node.get_rank_bit(select_ep_0, False)
             curr_node = curr_node.children[0]
 
             return self.max_elem_util(curr_node, new_sp, new_ep)
