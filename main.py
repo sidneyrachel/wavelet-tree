@@ -1,16 +1,17 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+import sys
+from models.file_reader import FileReader
+from models.wavelet_tree import WaveletTree
 
 
-# Press the green button in the gutter to run the script.
+def main():
+    file_reader = FileReader(sys.argv)
+    if (not file_reader.is_read()):
+        sys.exit()
+    wavelet_tree = WaveletTree(file_reader.get_characters())
+    # print(wavelet_tree.track_symbol(1))
+    # print(wavelet_tree.rank_query('5', 6))
+    # print(wavelet_tree.select_query('e', 1))
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()
