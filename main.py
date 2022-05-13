@@ -10,12 +10,18 @@ def main():
         sys.exit()
 
     wavelet_tree = WaveletTree(file_reader.get_characters())
-    # wavelet_tree.print_tree(True)
-    # wavelet_tree.print_tree(False)
-    # print('max_elem(5,8):', wavelet_tree.max_elem(5, 8))
-    # print('min_elem(5,8):', wavelet_tree.min_elem(5, 8))
-    # print('range_int(5,7,9,12)', wavelet_tree.range_int(5, 7, 9, 12))
-    print(wavelet_tree.max_range(3, 12, '6', '7'))
+    print('Original tree:')
+    wavelet_tree.print_tree(is_bit=False)
+    print()
+
+    print('Bit tree:')
+    wavelet_tree.print_tree(is_bit=True)
+    print()
+
+    print('max_elem(5,8):', wavelet_tree.max_elem(5, 8))
+    print('min_elem(5,8):', wavelet_tree.min_elem(5, 8))
+    print('range_int(5,7,9,12)', wavelet_tree.range_int(5, 7, 9, 12))
+    print(wavelet_tree.max_range(4, 9, '4', '9'))
 
 
 if __name__ == '__main__':

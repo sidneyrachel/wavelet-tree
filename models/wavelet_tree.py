@@ -27,9 +27,9 @@ class WaveletTree(object):
             return -1
         return self.__root.get_track_symbol(position)
 
-    def __print_tree_util(self, current_node, space_num, bit):
+    def __print_tree_util(self, current_node, space_num, is_bit):
         space = ''.join([' '] * space_num)
-        if bit:
+        if is_bit:
             print(space + ' '.join([str(int(bit_data)) for bit_data in current_node.bits_full_data]))
         else:
             print(space + ' '.join(current_node.full_data))
@@ -37,15 +37,15 @@ class WaveletTree(object):
         new_space_num = space_num + 2
 
         for child in current_node.children:
-            self.__print_tree_util(child, new_space_num, bit)
+            self.__print_tree_util(child, new_space_num, is_bit)
 
     def get_root(self):
         return self.__root
 
-    def print_tree(self, bit=False):
+    def print_tree(self, is_bit=False):
         current_node = self.__root
 
-        self.__print_tree_util(current_node, 0, bit)
+        self.__print_tree_util(current_node, 0, is_bit)
 
     def is_contain_bit(self, curr_node, sp, ep, bit):
         rank_sp = (0 if sp == 1 else curr_node.get_rank_bit(sp - 1, bit)) + 1
@@ -129,7 +129,7 @@ class WaveletTree(object):
     def max_range_util(self, prio_queue, curr_node, sp, ep, l, h):
         if len(curr_node.children) == 0:
             if l <= curr_node.full_data[0] <= h:
-                prio_queue.put((-1 * len(curr_node.full_data), curr_node.full_data[0]))
+                prio_queue.put((-1 * (ep - sp + 1), curr_node.full_data[0]))
 
             return
 
