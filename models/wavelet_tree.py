@@ -128,8 +128,7 @@ class WaveletTree(object):
 
     def max_range_util(self, prio_queue, curr_node, sp, ep, l, h):
         if len(curr_node.children) == 0:
-            if l <= curr_node.full_data[0] <= h:
-                prio_queue.put((-1 * (ep - sp + 1), curr_node.full_data[0]))
+            prio_queue.put((-1 * (ep - sp + 1), curr_node.full_data[0]))
 
             return
 
